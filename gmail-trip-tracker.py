@@ -11,7 +11,6 @@ from google.auth.transport.requests import Request
 from bs4 import BeautifulSoup
 import base64
 import re
-from datetime import datetime
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
