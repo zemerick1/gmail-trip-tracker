@@ -86,7 +86,10 @@ for msg in messages:
     for lines in mssg_body:
         if 'cities visited this month' in lines:
             cities_visited = lines.strip().split(' ')[0]
-            city_data.append(cities_visited)
+            city_data.append(int(cities_visited))
+
+# Set a relative max.
+max = max(city_data) + 5
 
 # Build Flask App to serve the data nicely.
 app = Flask(__name__)
@@ -95,7 +98,7 @@ app = Flask(__name__)
 def chart():
     labels = month_data
     values = city_data
-    return render_template('chart.html', title='Cities Traveled', max=50, values=values, labels=labels)
+    return render_template('chart.html', title='Cities Traveled', max=max, values=values, labels=labels)
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5004, debug=True)
