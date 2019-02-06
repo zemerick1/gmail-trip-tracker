@@ -16,8 +16,11 @@ import re
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-"""Shows basic usage of the Gmail API.
-Lists the user's Gmail labels.
+"""
+Searches GMAIL for location services emails and pulls the cities traveled count out then plots the data by Month.
+    TODO: Further filter and include year. Otherwise, the data will be corrupt.
+    
+    Thanks to: https://github.com/abhishekchhibber/Gmail-Api-through-Python
 """
 creds = None
 # The file token.pickle stores the user's access and refresh tokens, and is
@@ -27,6 +30,7 @@ if os.path.exists('token.pickle'):
     with open('token.pickle', 'rb') as token:
         creds = pickle.load(token)
 # If there are no (valid) credentials available, let the user log in.
+# This will open a browser to store the token locally.
 if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
@@ -44,7 +48,9 @@ service = build('gmail', 'v1', credentials=creds)
 query = 'noreply-maps-timeline@google.com'
 results = service.users().messages().list(userId=user_id,q=query).execute()
 messages = results['messages']
+# Ugly but works perfectly for these emails.
 regMonth = r'(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)'
+# Initialize data that will be fed to our line chart.
 city_data = []
 month_data = []
 for msg in messages:
@@ -73,13 +79,13 @@ for msg in messages:
     soup = BeautifulSoup(clean_two, "lxml")
     mssg_body = soup.prettify().splitlines()
     # mssg_body is a readable form of message body
-    # depending on the end user's requirements, it can be further cleaned
-    # using regex, beautiful soup, or any other method
+    # Read msg to find the line we want.
     for lines in mssg_body:
         if 'cities visited this month' in lines:
             cities_visited = lines.strip().split(' ')[0]
             city_data.append(cities_visited)
 
+# Build Flask App to serve the data nicely.
 app = Flask(__name__)
 
 @app.route("/")
