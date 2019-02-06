@@ -41,7 +41,7 @@ if not creds or not creds.valid:
 user_id = 'me'
 service = build('gmail', 'v1', credentials=creds)
 
-# Call the Gmail API
+# Call the Gmail API / query based on sender address
 query = 'noreply-maps-timeline@google.com'
 results = service.users().messages().list(userId=user_id,q=query).execute()
 messages = results['messages']
@@ -69,7 +69,7 @@ for msg in messages:
                         if two['name'] == 'Date':
                             msg_date = two['value']
                             year_reg = re.findall(regYear, msg_date)
-                    # Add month + year
+                    # Add month + year / will appear as January 2019, etc
                     month_data.append(match[0] + ' ' + year_reg[0])
     # Fetching message body
     mssg_parts = payld['parts']  # fetching the message parts
