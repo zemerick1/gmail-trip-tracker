@@ -45,9 +45,11 @@ service = build('gmail', 'v1', credentials=creds)
 query = 'noreply-maps-timeline@google.com'
 results = service.users().messages().list(userId=user_id,q=query).execute()
 messages = results['messages']
+
 # Ugly but works perfectly for these emails.
 regMonth = r'(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)'
 regYear = r'(\d{4})'
+
 # Initialize data that will be fed to our line chart.
 city_data = []
 month_data = []
@@ -72,12 +74,8 @@ for msg in messages:
                     # Add month + year / will appear as January 2019, etc
                     month_data.append(match[0] + ' ' + year_reg[0])
     # Fetching message body
-    mssg_parts = payld['parts']  # fetching the message parts
-    part_one = mssg_parts[0]  # fetching first element of the part
-    part_body = part_one['body']  # fetching body of the message
-    part_data = part_body['data']  # fetching data from the body
-    clean_one = part_data.replace("-", "+")  # decoding from Base64 to UTF-8
-    clean_one = clean_one.replace("_", "/")  # decoding from Base64 to UTF-8
+    body_data = payld['parts'][0]['body']['data']  # fetching first element of the part
+    clean_one = body_data.replace("-", "+").replace('_', '/')  # decoding from Base64 to UTF-8
     clean_two = base64.b64decode(bytes(clean_one, 'UTF-8'))  # decoding from Base64 to UTF-8
     soup = BeautifulSoup(clean_two, "lxml")
     mssg_body = soup.prettify().splitlines()
