@@ -11,15 +11,13 @@ from google.auth.transport.requests import Request
 from bs4 import BeautifulSoup
 import base64
 import re
-
+from datetime import datetime
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 """
 Searches GMAIL for location services emails and pulls the cities traveled count out then plots the data by Month.
-    TODO: Further filter and include year. Otherwise, the data will be corrupt.
-    
     Thanks to: https://github.com/abhishekchhibber/Gmail-Api-through-Python
 """
 creds = None
@@ -50,6 +48,7 @@ results = service.users().messages().list(userId=user_id,q=query).execute()
 messages = results['messages']
 # Ugly but works perfectly for these emails.
 regMonth = r'(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)'
+regYear = r'(\d{4})'
 # Initialize data that will be fed to our line chart.
 city_data = []
 month_data = []
@@ -67,7 +66,12 @@ for msg in messages:
                 if match is None:
                     continue
                 else:
-                    month_data.append(match[0])
+                    for two in headr:  # getting the date
+                        if two['name'] == 'Date':
+                            msg_date = two['value']
+                            year_reg = re.findall(regYear, msg_date)
+                    # Add month + year
+                    month_data.append(match[0] + ' ' + year_reg[0])
     # Fetching message body
     mssg_parts = payld['parts']  # fetching the message parts
     part_one = mssg_parts[0]  # fetching first element of the part
